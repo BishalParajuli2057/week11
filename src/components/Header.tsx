@@ -10,10 +10,21 @@ export default function Header() {
         </Typography>
 
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button color="inherit" component={RouterLink} to="/">
+          <Button
+            data-testid="mui-button"
+            color="inherit"
+            component={RouterLink}
+            to="/"
+          >
             home
           </Button>
-          <Button color="inherit" component={RouterLink} to="/saved">
+
+          <Button
+            data-testid="mui-button"
+            color="inherit"
+            component={RouterLink}
+            to="/saved"
+          >
             saved
           </Button>
         </Box>

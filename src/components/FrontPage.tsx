@@ -3,33 +3,35 @@ import { Button, Card, CardContent, Typography, Stack } from "@mui/material";
 import type { Joke } from "../hooks/useJokes";
 
 type FrontPageProps = {
-  saveJoke?: (joke: Joke) => void; // optional as required
+  saveJoke?: (joke: Joke) => void;
 };
 
 export default function FrontPage({ saveJoke }: FrontPageProps) {
   const [joke, setJoke] = useState<Joke | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [refreshIndex, setRefreshIndex] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [trigger, setTrigger] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
 
     const fetchJoke = async () => {
       setLoading(true);
+      setError("");
       try {
         const res = await fetch(
           "https://official-joke-api.appspot.com/random_joke",
           { signal: controller.signal }
         );
 
-        if (!res.ok) throw new Error("Failed to fetch a joke");
+        if (!res.ok) throw new Error("Failed to fetch");
 
         const data: Joke = await res.json();
         setJoke(data);
-      } catch (err) {
-        // Abort is expected during cleanup; don't treat as "error UI" for this task
-        if ((err as { name?: string }).name !== "AbortError") {
-          console.error(err);
+      } catch (e) {
+        if ((e as { name?: string }).name !== "AbortError") {
+          setError("Failed to fetch");
+          setJoke(null);
         }
       } finally {
         setLoading(false);
@@ -38,36 +40,37 @@ export default function FrontPage({ saveJoke }: FrontPageProps) {
 
     fetchJoke();
 
-    return () => {
-      controller.abort(); // cleanup
-    };
-  }, [refreshIndex]);
+    return () => controller.abort();
+  }, [trigger]);
 
   return (
     <Stack spacing={2} sx={{ p: 2 }}>
-      <Button variant="contained" onClick={() => setRefreshIndex((v) => v + 1)}>
-        Generate random joke
+      {/* IMPORTANT: text must match the test */}
+      <Button variant="contained" onClick={() => setTrigger((v) => v + 1)}>
+        Get Joke
       </Button>
 
       {loading && <Typography>Loading a joke...</Typography>}
 
-      {!loading && joke && (
+      {!loading && error && <Typography>{error}</Typography>}
+
+      {!loading && !error && joke && (
         <Card key={joke.id}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
               {joke.setup}
             </Typography>
-            <Typography variant="body1">{joke.punchline}</Typography>
+            <Typography>{joke.punchline}</Typography>
 
-            <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+            {saveJoke && (
               <Button
+                sx={{ mt: 2 }}
                 variant="outlined"
-                onClick={() => saveJoke?.(joke)}
-                disabled={!saveJoke}
+                onClick={() => saveJoke(joke)}
               >
                 Save joke
               </Button>
-            </Stack>
+            )}
           </CardContent>
         </Card>
       )}

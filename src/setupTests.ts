@@ -1,6 +1,9 @@
 import "@testing-library/jest-dom";
-import { afterEach } from "vitest";
+import { vi } from "vitest";
 
-afterEach(() => {
-  // Clean up after each test
-});
+declare global {
+  // expose a `jest` global (for code/tests that expect jest)
+  var jest: typeof vi;
+}
+
+globalThis.jest = vi;

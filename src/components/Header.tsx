@@ -3,7 +3,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 export default function Header() {
   return (
-    <AppBar position="static">
+    <AppBar position="static" data-testid="mui-appbar">
       <Toolbar>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Joke Generator
